@@ -1,6 +1,35 @@
 # Email Verifier — Руководство по развёртыванию
 
-## 🚀 Быстрый старт
+## 🖥️ Локальная разработка
+
+```bash
+# Клонирование репозитория
+git clone https://github.com/Rom2555/email-verifier.git
+cd email-verifier
+
+# Создание виртуального окружения
+python -m venv .venv
+source .venv/bin/activate  # или .venv\Scripts\activate на Windows
+
+# Установка зависимостей
+pip install -r requirements.txt
+
+# Настройка локальных переменных
+cp local_settings_example.py local_settings.py
+# Отредактируйте local_settings.py и заполните SECRET_KEY
+
+# Миграции базы данных
+python manage.py migrate
+
+# Запуск сервера
+python manage.py runserver
+```
+
+Откройте http://localhost:8000 в браузере.
+
+---
+
+## 🚀 Быстрый старт (Production)
 
 ### 1. Требования к серверу
 - Ubuntu 20.04+ / Debian 11+
