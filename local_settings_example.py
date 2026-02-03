@@ -3,7 +3,7 @@
 Скопируйте этот файл в local_settings.py и заполните свои значения.
 """
 
-from .settings import *
+from mon_project.settings import *
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'your-secret-key-here'
