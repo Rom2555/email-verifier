@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Верификатор - Проверка email адресов</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .nav {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .nav a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 25px;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+        }
+        
+        .nav a:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: white;
+        }
+        
+        .nav a.btn-primary {
+            background: white;
+            color: #667eea;
+            border-color: white;
+        }
+        
+        .nav a.btn-primary:hover {
+            background: rgba(255,255,255,0.9);
+        }
+        
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group input {
+            flex: 1;
+            padding: 18px 25px;
+            font-size: 1.1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            border-color: #667eea;
+        }
+        
+        .form-group button {
+            padding: 18px 40px;
+            font-size: 1.1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: 600;
+        }
+        
+        .form-group button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        .form-group button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        .result {
+            display: none;
+            margin-top: 30px;
+        }
+        
+        .result.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+            position: relative;
+        }
+        
+        .score-circle.high {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        
+        .score-circle.medium {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .score-circle.low {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+        }
+        
+        .score-label {
+            position: absolute;
+            bottom: -25px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .score-circle.unknown {
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .status-badge.valid {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-badge.invalid {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-badge.unknown {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-badge.risky {
+            background: #ffe0b2;
+            color: #e65100;
+        }
+        
+        .checks-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+        
+        .check-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        
+        .check-icon.success {
+            background: #d4edda;
+            color: #28a745;
+        }
+        
+        .check-icon.fail {
+            background: #f8d7da;
+            color: #dc3545;
+        }
+        
+        .check-icon.warning {
+            background: #fff3cd;
+            color: #ffc107;
+        }
+        
+        .check-text h4 {
+            font-size: 1rem;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .check-text p {
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .details {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+        
+        .details h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .details-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .details-row:last-child {
+            border-bottom: none;
+        }
+        
+        .details-row span:first-child {
+            color: #666;
+        }
+        
+        .details-row span:last-child {
+            font-weight: 500;
+            color: #333;
+            word-break: break-all;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 40px;
+        }
+        
+        .feature {
+            text-align: center;
+            padding: 30px 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            color: white;
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .feature h3 {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+        
+        .feature p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e0e0e0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        footer {
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+            opacity: 0.8;
+        }
+        
+        footer a {
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .form-group {
+                flex-direction: column;
+            }
+            
+            .checks-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+            }
+            
+            header h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="nav">
+            <a href="{% url 'money:home' %}">🏠 Главная</a>
+            <a href="{% url 'money:pricing' %}">💰 Тарифы</a>
+            {% if user.is_authenticated %}
+            <a href="{% url 'money:dashboard' %}">📊 Кабинет</a>
+            <a href="{% url 'money:history' %}">📋 История</a>
+            <a href="{% url 'money:logout' %}">🚪 Выйти</a>
+            {% else %}
+            <a href="{% url 'money:login' %}">🔑 Войти</a>
+            <a href="{% url 'money:register' %}" class="btn-primary">📝 Регистрация</a>
+            {% endif %}
+        </nav>
+        
+        <header>
+            <h1>📧 Email Верификатор</h1>
+            <p>Проверьте валидность email адреса за секунды</p>
+        </header>
+        
+        <div class="card">
+            <form id="verifyForm" method="post" action="{% url 'money:verify' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <input type="email" name="email" id="emailInput" placeholder="Введите email адрес..." required>
+                    <button type="submit" id="submitBtn">Проверить</button>
+                </div>
+            </form>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Проверяем email...</p>
+            </div>
+            
+            <div class="result" id="result">
+                <div class="score-circle" id="scoreCircle">
+                    <span id="scoreValue">0</span>
+                    <span class="score-label">из 100</span>
+                </div>
+                
+                <div class="checks-grid" id="checksGrid">
+                    <!-- Заполняется JavaScript -->
+                </div>
+                
+                <div class="details" id="details">
+                    <h3>📋 Детали проверки</h3>
+                    <div id="detailsContent">
+                        <!-- Заполняется JavaScript -->
+                    </div>
+                </div>
+            </div>
+            
+            {% if result %}
+            <div class="result show">
+                <div class="score-circle {% if result.score >= 75 %}high{% elif result.score >= 50 %}medium{% else %}low{% endif %}">
+                    <span>{{ result.score }}</span>
+                    <span class="score-label">из 100</span>
+                </div>
+                
+                <div class="checks-grid">
+                    <div class="check-item">
+                        <div class="check-icon {% if result.is_valid_syntax %}success{% else %}fail{% endif %}">
+                            {% if result.is_valid_syntax %}✓{% else %}✗{% endif %}
+                        </div>
+                        <div class="check-text">
+                            <h4>Синтаксис</h4>
+                            <p>{% if result.is_valid_syntax %}Формат email корректный{% else %}Неверный формат{% endif %}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="check-item">
+                        <div class="check-icon {% if result.has_mx_record %}success{% else %}fail{% endif %}">
+                            {% if result.has_mx_record %}✓{% else %}✗{% endif %}
+                        </div>
+                        <div class="check-text">
+                            <h4>MX-записи</h4>
+                            <p>{% if result.has_mx_record %}Домен принимает почту{% else %}MX-записи не найдены{% endif %}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="check-item">
+                        <div class="check-icon {% if result.is_deliverable %}success{% else %}fail{% endif %}">
+                            {% if result.is_deliverable %}✓{% else %}✗{% endif %}
+                        </div>
+                        <div class="check-text">
+                            <h4>Доставляемость</h4>
+                            <p>{% if result.is_deliverable %}Email доставляемый{% else %}Не удалось подтвердить{% endif %}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="check-item">
+                        <div class="check-icon {% if not result.is_disposable %}success{% else %}warning{% endif %}">
+                            {% if not result.is_disposable %}✓{% else %}⚠{% endif %}
+                        </div>
+                        <div class="check-text">
+                            <h4>Тип email</h4>
+                            <p>{% if result.is_disposable %}Одноразовый email{% else %}Постоянный email{% endif %}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="details">
+                    <h3>📋 Детали проверки</h3>
+                    <div class="details-row">
+                        <span>Email:</span>
+                        <span>{{ result.email }}</span>
+                    </div>
+                    <div class="details-row">
+                        <span>Домен:</span>
+                        <span>{{ result.domain }}</span>
+                    </div>
+                    {% if result.mx_records %}
+                    <div class="details-row">
+                        <span>MX-записи:</span>
+                        <span>{{ result.mx_records|join:", " }}</span>
+                    </div>
+                    {% endif %}
+                    {% if result.error_message %}
+                    <div class="details-row">
+                        <span>Ошибка:</span>
+                        <span style="color: #dc3545;">{{ result.error_message }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">⚡</div>
+                <h3>Быстрая проверка</h3>
+                <p>Результат за несколько секунд</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔒</div>
+                <h3>Безопасно</h3>
+                <p>Данные не передаются третьим лицам</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📊</div>
+                <h3>Детальный отчёт</h3>
+                <p>Полная информация о email</p>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2024 Email Верификатор | <a href="{% url 'money:history' %}">История проверок</a></p>
+        </footer>
+    </div>
+    
+    <script>
+        const form = document.getElementById('verifyForm');
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('emailInput').value;
+            
+            // Показываем загрузку
+            loading.classList.add('show');
+            result.classList.remove('show');
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch('{% url "money:verify_api" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email: email })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayResult(data.data);
+                } else {
+                    alert(data.error || 'Произошла ошибка');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Произошла ошибка при проверке');
+            } finally {
+                loading.classList.remove('show');
+                submitBtn.disabled = false;
+            }
+        });
+        
+        function displayResult(data) {
+            const scoreCircle = document.getElementById('scoreCircle');
+            const scoreValue = document.getElementById('scoreValue');
+            const checksGrid = document.getElementById('checksGrid');
+            const detailsContent = document.getElementById('detailsContent');
+            
+            // Обновляем балл
+            scoreValue.textContent = data.score;
+            scoreCircle.className = 'score-circle';
+            
+            // Определяем класс по статусу
+            if (data.status === 'valid') {
+                scoreCircle.classList.add('high');
+            } else if (data.status === 'unknown') {
+                scoreCircle.classList.add('unknown');
+            } else if (data.status === 'risky') {
+                scoreCircle.classList.add('medium');
+            } else {
+                scoreCircle.classList.add('low');
+            }
+            
+            // Статус-бейдж
+            const statusLabels = {
+                'valid': '✅ Валидный email',
+                'invalid': '❌ Невалидный email',
+                'unknown': '⚠️ Не удалось проверить',
+                'risky': '⚠️ Рискованный email'
+            };
+            
+            // Обновляем проверки
+            checksGrid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center;">
+                    <span class="status-badge ${data.status}">${statusLabels[data.status] || data.status}</span>
+                </div>
+                <div class="check-item">
+                    <div class="check-icon ${data.is_valid_syntax ? 'success' : 'fail'}">
+                        ${data.is_valid_syntax ? '✓' : '✗'}
+                    </div>
+                    <div class="check-text">
+                        <h4>Синтаксис</h4>
+                        <p>${data.is_valid_syntax ? 'Формат email корректный' : 'Неверный формат'}</p>
+                    </div>
+                </div>
+                <div class="check-item">
+                    <div class="check-icon ${data.has_mx_record ? 'success' : 'fail'}">
+                        ${data.has_mx_record ? '✓' : '✗'}
+                    </div>
+                    <div class="check-text">
+                        <h4>MX-записи</h4>
+                        <p>${data.has_mx_record ? 'Домен принимает почту' : 'MX-записи не найдены'}</p>
+                    </div>
+                </div>
+                <div class="check-item">
+                    <div class="check-icon ${data.is_deliverable ? 'success' : (data.is_deliverable_unknown ? 'warning' : 'fail')}">
+                        ${data.is_deliverable ? '✓' : (data.is_deliverable_unknown ? '?' : '✗')}
+                    </div>
+                    <div class="check-text">
+                        <h4>Доставляемость</h4>
+                        <p>${data.is_deliverable ? 'Ящик существует' : (data.is_deliverable_unknown ? 'Не удалось проверить' : 'Ящик не существует')}</p>
+                    </div>
+                </div>
+                <div class="check-item">
+                    <div class="check-icon ${!data.is_disposable ? 'success' : 'warning'}">
+                        ${!data.is_disposable ? '✓' : '⚠'}
+                    </div>
+                    <div class="check-text">
+                        <h4>Тип email</h4>
+                        <p>${data.is_disposable ? 'Одноразовый email' : 'Постоянный email'}</p>
+                    </div>
+                </div>
+            `;
+            
+            // Обновляем детали
+            let detailsHtml = `
+                <div class="details-row">
+                    <span>Email:</span>
+                    <span>${data.email}</span>
+                </div>
+                <div class="details-row">
+                    <span>Домен:</span>
+                    <span>${data.domain}</span>
+                </div>
+            `;
+            
+            if (data.mx_records && data.mx_records.length > 0) {
+                detailsHtml += `
+                    <div class="details-row">
+                        <span>MX-записи:</span>
+                        <span>${data.mx_records.join(', ')}</span>
+                    </div>
+                `;
+            }
+            
+            if (data.error_message) {
+                detailsHtml += `
+                    <div class="details-row">
+                        <span>Ошибка:</span>
+                        <span style="color: #dc3545;">${data.error_message}</span>
+                    </div>
+                `;
+            }
+            
+            detailsContent.innerHTML = detailsHtml;
+            
+            // Показываем результат
+            result.classList.add('show');
+        }
+    </script>
+</body>
+</html>

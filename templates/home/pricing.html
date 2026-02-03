@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тарифы - Email Верификатор</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .nav {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            opacity: 0.8;
+        }
+        
+        .nav a:hover {
+            opacity: 1;
+        }
+        
+        .toggle-period {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 40px;
+        }
+        
+        .toggle-btn {
+            padding: 12px 30px;
+            border: 2px solid white;
+            background: transparent;
+            color: white;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .toggle-btn.active {
+            background: white;
+            color: #667eea;
+        }
+        
+        .toggle-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .toggle-btn.active:hover {
+            background: white;
+        }
+        
+        .save-badge {
+            background: #38ef7d;
+            color: #000;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+        
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+        
+        .pricing-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            transition: transform 0.3s;
+        }
+        
+        .pricing-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .pricing-card.popular {
+            border: 3px solid #667eea;
+            transform: scale(1.05);
+        }
+        
+        .pricing-card.popular:hover {
+            transform: scale(1.05) translateY(-10px);
+        }
+        
+        .popular-badge {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .plan-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        
+        .plan-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .plan-price {
+            margin-bottom: 20px;
+        }
+        
+        .price-amount {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .price-period {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .plan-features {
+            list-style: none;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+        
+        .plan-features li {
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .plan-features li:last-child {
+            border-bottom: none;
+        }
+        
+        .feature-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+        
+        .feature-icon.yes {
+            background: #d4edda;
+            color: #28a745;
+        }
+        
+        .feature-icon.no {
+            background: #f8d7da;
+            color: #dc3545;
+        }
+        
+        .plan-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .plan-btn.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .plan-btn.primary:hover {
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        .plan-btn.secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .plan-btn.secondary:hover {
+            background: #e0e0e0;
+        }
+        
+        .faq {
+            margin-top: 60px;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+        }
+        
+        .faq h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        
+        .faq-item {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .faq-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .faq-item h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .faq-item p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        footer {
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+            opacity: 0.8;
+        }
+        
+        @media (max-width: 1024px) {
+            .pricing-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .pricing-card.popular {
+                transform: none;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            header h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💰 Тарифные планы</h1>
+            <p>Выберите план, который подходит именно вам</p>
+        </header>
+        
+        <nav class="nav">
+            <a href="{% url 'money:home' %}">Главная</a>
+            {% if user.is_authenticated %}
+            <a href="{% url 'money:dashboard' %}">Личный кабинет</a>
+            <a href="{% url 'money:logout' %}">Выйти</a>
+            {% else %}
+            <a href="{% url 'money:login' %}">Войти</a>
+            <a href="{% url 'money:register' %}">Регистрация</a>
+            {% endif %}
+        </nav>
+        
+        <div class="toggle-period">
+            <button class="toggle-btn active" data-period="monthly">Ежемесячно</button>
+            <button class="toggle-btn" data-period="yearly">
+                Ежегодно <span class="save-badge">-20%</span>
+            </button>
+        </div>
+        
+        <div class="pricing-grid">
+            <!-- Бесплатный план -->
+            <div class="pricing-card">
+                <div class="plan-icon">🆓</div>
+                <h3 class="plan-name">Бесплатный</h3>
+                <div class="plan-price">
+                    <span class="price-amount">0 ₽</span>
+                    <span class="price-period">/ навсегда</span>
+                </div>
+                <ul class="plan-features">
+                    <li>
+                        <span class="feature-icon yes">✓</span>
+                        <span>5 проверок в день</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon yes">✓</span>
+                        <span>100 проверок в месяц</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon no">✗</span>
+                        <span>Доступ к API</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon no">✗</span>
+                        <span>Массовая проверка</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon no">✗</span>
+                        <span>Приоритетная поддержка</span>
+                    </li>
+                </ul>
+                <a href="{% url 'money:subscribe' 'free' %}" class="plan-btn secondary">Начать бесплатно</a>
+            </div>
+            
+            <!-- Базовый план -->
+            <div class="pricing-card">
+                <div class="plan-icon">⭐</div>
+                <h3 class="plan-name">Базовый</h3>
+                <div class="plan-price">
+                    <span class="price-amount" data-monthly="490" data-yearly="4704">490 ₽</span>
+                    <span class="price-period">/ месяц</span>
+                </div>
+                <ul class="plan-features">
+                    <li>
+                        <span class="feature-icon yes">✓</span>
+                        <span>50 проверок в день</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon yes">✓</span>
+                        <span>1 000 проверок в месяц</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon yes">✓</span>
+                        <span>Доступ к API</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon no">✗</span>
+                        <span>Массовая проверка</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon no">✗</span>
+                        <span>Приоритетная поддержка</span>
+                    </li>
+                </ul>
+                <a href="{% url 'money:subscribe' 'basic' %}" class="plan-btn secondary">Выбрать план</a>
+            </div>
+            
+            <!-- Профессиональный план -->
+            <div class="pricing-card popular">
+                <span class="popular-badge">Популярный</span>
+                <div class="plan-icon">🚀</div>
+                <h3 class="plan-name">Профессиональный</h3>
+                <div class="plan-price">
+                    <span class="price-amount" data-monthly="1490" data-yearly="14304">1 490 ₽</span>
+                    <span class="price-period">/ месяц</span>
+                </div>
+                <ul class="plan-features">
+                    <li>
+                        <span class="feature-icon yes">✓</span>
+                        <span>200 проверок в день</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon yes">✓</span>
+                        <span>5 000 проверок в месяц</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon yes">✓</span>
+                        <span>Доступ к API</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon yes">✓</span>
+                        <span>Массовая проверка</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon no">✗</span>
+                        <span>Приоритетная поддержка</span>
+                    </li>
+                </ul>
+                <a href="{% url 'money:subscribe' 'pro' %}" class="plan-btn primary">Выбрать план</a>
+            </div>
+            
+            <!-- Бизнес план -->
+            <div class="pricing-card">
+                <div class="plan-icon">🏢</div>
+                <h3 class="plan-name">Бизнес</h3>
+                <div class="plan-price">
+                    <span class="price-amount" data-monthly="4990" data-yearly="47904">4 990 ₽</span>
+                    <span class="price-period">/ месяц</span>
+                </div>
+                <ul class="plan-features">
+                    <li>
+                        <span class="feature-icon yes">✓</span>
+                        <span>Безлимитные проверки</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon yes">✓</span>
+                        <span>50 000 проверок в месяц</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon yes">✓</span>
+                        <span>Доступ к API</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon yes">✓</span>
+                        <span>Массовая проверка</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon yes">✓</span>
+                        <span>Приоритетная поддержка</span>
+                    </li>
+                </ul>
+                <a href="{% url 'money:subscribe' 'business' %}" class="plan-btn secondary">Выбрать план</a>
+            </div>
+        </div>
+        
+        <div class="faq">
+            <h2>❓ Часто задаваемые вопросы</h2>
+            
+            <div class="faq-item">
+                <h3>Как работает API?</h3>
+                <p>После оформления подписки вы получите API-ключ в личном кабинете. Используйте его для отправки запросов на наш API endpoint. Документация доступна в личном кабинете.</p>
+            </div>
+            
+            <div class="faq-item">
+                <h3>Можно ли отменить подписку?</h3>
+                <p>Да, вы можете отменить подписку в любой момент. Доступ сохранится до конца оплаченного периода.</p>
+            </div>
+            
+            <div class="faq-item">
+                <h3>Какие способы оплаты принимаются?</h3>
+                <p>Мы принимаем банковские карты (Visa, MasterCard, МИР), а также оплату через ЮKassa.</p>
+            </div>
+            
+            <div class="faq-item">
+                <h3>Что такое массовая проверка?</h3>
+                <p>Массовая проверка позволяет загрузить файл со списком email адресов и проверить их все сразу. Результаты можно скачать в формате CSV.</p>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2024 Email Верификатор | <a href="{% url 'money:home' %}" style="color: white;">Главная</a></p>
+        </footer>
+    </div>
+    
+    <script>
+        const toggleBtns = document.querySelectorAll('.toggle-btn');
+        const priceAmounts = document.querySelectorAll('.price-amount[data-monthly]');
+        const periodTexts = document.querySelectorAll('.price-period');
+        
+        toggleBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                toggleBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                const period = this.dataset.period;
+                
+                priceAmounts.forEach(price => {
+                    const monthly = price.dataset.monthly;
+                    const yearly = price.dataset.yearly;
+                    
+                    if (period === 'yearly') {
+                        price.textContent = Math.round(yearly / 12).toLocaleString('ru-RU') + ' ₽';
+                    } else {
+                        price.textContent = parseInt(monthly).toLocaleString('ru-RU') + ' ₽';
+                    }
+                });
+                
+                periodTexts.forEach(text => {
+                    if (text.textContent !== '/ навсегда') {
+                        text.textContent = period === 'yearly' ? '/ месяц (при оплате за год)' : '/ месяц';
+                    }
+                });
+                
+                // Обновляем ссылки
+                document.querySelectorAll('.plan-btn').forEach(link => {
+                    if (link.href && link.href.includes('subscribe')) {
+                        const url = new URL(link.href);
+                        url.searchParams.set('period', period);
+                        link.href = url.toString();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

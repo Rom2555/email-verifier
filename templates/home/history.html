@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>История проверок - Email Верификатор</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        header a {
+            color: white;
+            text-decoration: none;
+            opacity: 0.8;
+        }
+        
+        header a:hover {
+            opacity: 1;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .badge.success {
+            background: #d4edda;
+            color: #28a745;
+        }
+        
+        .badge.fail {
+            background: #f8d7da;
+            color: #dc3545;
+        }
+        
+        .badge.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .score {
+            font-weight: bold;
+        }
+        
+        .score.high { color: #28a745; }
+        .score.medium { color: #ffc107; }
+        .score.low { color: #dc3545; }
+        
+        .empty {
+            text-align: center;
+            padding: 60px;
+            color: #666;
+        }
+        
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            table {
+                font-size: 0.85rem;
+            }
+            
+            th, td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📋 История проверок</h1>
+            <a href="{% url 'money:home' %}">← Вернуться к проверке</a>
+        </header>
+        
+        <div class="card">
+            {% if verifications %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Балл</th>
+                        <th>Синтаксис</th>
+                        <th>MX</th>
+                        <th>Доставка</th>
+                        <th>Тип</th>
+                        <th>Дата</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for v in verifications %}
+                    <tr>
+                        <td>{{ v.email }}</td>
+                        <td>
+                            <span class="score {% if v.overall_score >= 75 %}high{% elif v.overall_score >= 50 %}medium{% else %}low{% endif %}">
+                                {{ v.overall_score }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge {% if v.is_valid_syntax %}success{% else %}fail{% endif %}">
+                                {% if v.is_valid_syntax %}✓{% else %}✗{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge {% if v.has_mx_record %}success{% else %}fail{% endif %}">
+                                {% if v.has_mx_record %}✓{% else %}✗{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge {% if v.is_deliverable %}success{% else %}fail{% endif %}">
+                                {% if v.is_deliverable %}✓{% else %}✗{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge {% if v.is_disposable %}warning{% else %}success{% endif %}">
+                                {% if v.is_disposable %}Одноразовый{% else %}Постоянный{% endif %}
+                            </span>
+                        </td>
+                        <td>{{ v.created_at|date:"d.m.Y H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty">
+                <div class="empty-icon">📭</div>
+                <h3>Пока нет проверок</h3>
+                <p>Проверьте первый email адрес!</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

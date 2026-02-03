@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оплата - Email Верификатор</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .checkout-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .checkout-card h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .order-summary {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .order-item:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 1.2rem;
+            padding-top: 15px;
+        }
+        .order-item span:first-child {
+            color: #666;
+        }
+        .order-item span:last-child {
+            color: #333;
+        }
+        .plan-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        .payment-methods {
+            margin-bottom: 30px;
+        }
+        .payment-methods h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .payment-option {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        .payment-option:hover, .payment-option.selected {
+            border-color: #667eea;
+        }
+        .payment-option input {
+            display: none;
+        }
+        .payment-option .radio {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ccc;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .payment-option.selected .radio {
+            border-color: #667eea;
+        }
+        .payment-option.selected .radio::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: #667eea;
+            border-radius: 50%;
+        }
+        .payment-icon {
+            font-size: 1.5rem;
+        }
+        .btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: box-shadow 0.3s;
+        }
+        .btn:hover {
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        .secure-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        /* Демо режим */
+        .demo-notice {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="checkout-card">
+        <h1>💳 Оформление подписки</h1>
+        
+        <div class="demo-notice">
+            ⚠️ Демо-режим: оплата симулируется. В реальном проекте здесь будет интеграция с ЮKassa/Stripe.
+        </div>
+        
+        <div class="order-summary">
+            <div class="order-item">
+                <span>Тарифный план:</span>
+                <span class="plan-badge">{{ plan.display_name }}</span>
+            </div>
+            <div class="order-item">
+                <span>Период:</span>
+                <span>{% if period == 'yearly' %}1 год{% else %}1 месяц{% endif %}</span>
+            </div>
+            <div class="order-item">
+                <span>Проверок в день:</span>
+                <span>{{ plan.daily_limit }}</span>
+            </div>
+            <div class="order-item">
+                <span>Проверок в месяц:</span>
+                <span>{{ plan.monthly_limit }}</span>
+            </div>
+            <div class="order-item">
+                <span>Итого к оплате:</span>
+                <span>{{ payment.amount }} ₽</span>
+            </div>
+        </div>
+        
+        <div class="payment-methods">
+            <h3>Способ оплаты</h3>
+            <label class="payment-option selected">
+                <input type="radio" name="payment_method" value="card" checked>
+                <span class="radio"></span>
+                <span class="payment-icon">💳</span>
+                <span>Банковская карта</span>
+            </label>
+            <label class="payment-option">
+                <input type="radio" name="payment_method" value="yookassa">
+                <span class="radio"></span>
+                <span class="payment-icon">🏦</span>
+                <span>ЮKassa</span>
+            </label>
+            <label class="payment-option">
+                <input type="radio" name="payment_method" value="sbp">
+                <span class="radio"></span>
+                <span class="payment-icon">📱</span>
+                <span>СБП (Система быстрых платежей)</span>
+            </label>
+        </div>
+        
+        <a href="{% url 'money:payment_callback' %}?payment_id={{ payment.payment_id }}" class="btn" style="display: block; text-align: center; text-decoration: none;">
+            Оплатить {{ payment.amount }} ₽
+        </a>
+        
+        <div class="secure-badge">
+            🔒 Безопасная оплата с шифрованием SSL
+        </div>
+        
+        <a href="{% url 'money:pricing' %}" class="back-link">← Вернуться к тарифам</a>
+    </div>
+    
+    <script>
+        document.querySelectorAll('.payment-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+    </script>
+</body>
+</html>
